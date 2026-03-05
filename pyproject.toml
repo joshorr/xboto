@@ -13,7 +13,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.12"
 xinject = "^1.4.0"
 boto3 = "^1.26.64"
 botocore = "^1.29.64"
@@ -45,10 +45,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.custom.xpublish]
 extra-module-docs = ['xsentinels', 'xinject']
-
-[[tool.poetry.source]]
-url = "https://pypi.fury.io/xyngular"
-name = "gemfury"
 
 [tool.pyright]
 include = "xboto"
