@@ -148,11 +148,7 @@ boto_session = BotoSession.proxy()
 """
 
 
-class _BaseBotoClientOrResource(Dependency):
-    # Instead of inheriting from `ThreadUnsafeResource`, we set flag directly ourselves.
-    # This allows us to be compatible with both v2 and v3 of xyn_resource.
-    resource_thread_safe = False
-
+class _BaseBotoClientOrResource(Dependency, thread_sharable=False):
     # Class Vars
     _boto_name: str = ''
     _boto_kind: str = ''
