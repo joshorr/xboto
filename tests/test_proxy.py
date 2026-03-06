@@ -63,7 +63,6 @@ def test_clients_ssm_importable():
     assert v["Parameter"]["Value"] == "testValue2"
 
 
-@moto.mock_dynamodb
 def test_resources_dynamodb_importable():
     table = dynamodb.create_table(
         TableName="test_table",
