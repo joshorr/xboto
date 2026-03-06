@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/joshorr/xboto/compare/v1.2.0...v1.2.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* create release with proper doc links. ([d69195c](https://github.com/joshorr/xboto/commit/d69195c5e4d449e8f30c8c9d8d990e956c680c15))
+
 ## [1.2.0](https://github.com/joshorr/xboto/compare/v1.1.1...v1.2.0) (2026-03-06)
 
 
