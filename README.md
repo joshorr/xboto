@@ -3,7 +3,7 @@
 
 ## Documentation
 
-**[📄 Detailed Documentation](https://xyngular.github.io/py-xboto/latest/)** | **[🐍 PyPi](https://pypi.org/project/xboto/)**
+**[📄 Detailed Documentation](https://joshorr.github.io/xboto/latest/)** | **[🐍 PyPi](https://pypi.org/project/xboto/)**
 
 ## Install
 
