@@ -5,7 +5,7 @@ description = "Easy lazy dependency injection for boto3 clients/resources."
 authors = ["Josh Orr <josh@orr.blue>"]
 packages = [{include = "xboto"}]
 readme = "README.md"
-repository = "https://github.com/xyngular/py-xboto"
+repository = "https://github.com/joshorr/xboto"
 keywords = ["boto", "boto client", "boto resource", "inject", "lazy", "dependency", "dependency injection", "aws"]
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
