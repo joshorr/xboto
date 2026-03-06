@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/joshorr/xboto/compare/v1.1.1...v1.2.0) (2026-03-06)
+
+
+### Features
+
+* adapt to latest version of xinject, we want all clients/resources per-thread/asyncio-context. ([1585a3b](https://github.com/joshorr/xboto/commit/1585a3b13aacb04fec5b8c290c0d4ae20f6e5990))
+
+
+### Bug Fixes
+
+* Use correct workflows now that it's in `joshorr` org. ([6c9f959](https://github.com/joshorr/xboto/commit/6c9f9594e0d05b8e1629ac9cbb90e3c7e088d0f5))
+
 ## [1.1.1](https://github.com/xyngular/py-xboto/compare/v1.1.0...v1.1.1) (2023-07-03)
 
 
