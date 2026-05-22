@@ -23,10 +23,9 @@ Or
 from typing import Any, Optional, Dict, Type, Callable
 
 import boto3
-import botocore
 from botocore.session import Session
-from xsentinels import Singleton
 from xinject import Dependency, XContext
+import xbool
 
 
 class BotoSession(Dependency):
@@ -147,8 +146,13 @@ boto_session = BotoSession.proxy()
     `_Loader` subclasses use this right now (see below).
 """
 
+# TODO: Need to separate `xboto_kwargs` configuration from the actual resource,
+#   so the configuration can be global while the resource is pre-thread.
+#   For now, to get by until I have time to do the separation:
+#       temporary look at a environmental variable to decide if we should make
+#       the clients/resources thread-sharable or not.
 
-class _BaseBotoClientOrResource(Dependency, thread_sharable=False):
+class _BaseBotoClientOrResource(Dependency, thread_sharable=xbool.bool_env('XBOTO_THREAD_SHARABLE')):
     # Class Vars
     _boto_name: str = ''
     _boto_kind: str = ''
