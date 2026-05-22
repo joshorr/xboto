@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/joshorr/xboto/compare/v1.2.1...v1.2.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* temporary workaround to prevent sharable xboto resources in some situations. ([21486ad](https://github.com/joshorr/xboto/commit/21486ada4599227e52ddcf4128b6b5b38ec91263))
+
 ## [1.2.1](https://github.com/joshorr/xboto/compare/v1.2.0...v1.2.1) (2026-03-06)
 
 
