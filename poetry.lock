@@ -1023,6 +1023,7 @@ python-versions = ">=3.10"
 groups = ["dev"]
 files = [
     {file = "griffelib-2.0.0-py3-none-any.whl", hash = "sha256:01284878c966508b6d6f1dbff9b6fa607bc062d8261c5c7253cb285b06422a7f"},
+    {file = "griffelib-2.0.0.tar.gz", hash = "sha256:e504d637a089f5cab9b5daf18f7645970509bf4f53eda8d79ed71cce8bd97934"},
 ]
 
 [package.extras]
@@ -2514,6 +2515,18 @@ markupsafe = ">=2.1.1"
 watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
+name = "xbool"
+version = "1.1.0"
+description = "General purpose bool/boolean utilities, extracting bools from strings."
+optional = false
+python-versions = ">=3.10,<4.0"
+groups = ["main"]
+files = [
+    {file = "xbool-1.1.0-py3-none-any.whl", hash = "sha256:84e3f4d6873639208c56f5fba70d4f0b66603d0dda80fff788b4fe4262ddc0d2"},
+    {file = "xbool-1.1.0.tar.gz", hash = "sha256:5c926f6ea07d0c14ba03e087bfce617a3eb99dea1fa1c7987d53e37a030f27ee"},
+]
+
+[[package]]
 name = "xinject"
 version = "1.6.0"
 description = "Lazy dependency injection."
@@ -2581,4 +2594,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "f2cd546b7ffa4082edef1bf9e517908b465fe3dc4f381cd4baca49e9eb518374"
+content-hash = "ebdba115f74c2df6bdcd48848125d7b10f8624ece3a8786ad0870f8c5d3047c0"
