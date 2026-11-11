@@ -25,7 +25,6 @@ from typing import Any, Optional, Dict, Type, Callable
 import boto3
 from botocore.session import Session
 from xinject import Dependency, XContext
-import xbool
 
 
 class BotoSession(Dependency):
@@ -127,14 +126,21 @@ class BotoSession(Dependency):
     def _boto_obj_for_dependency(
             self,
             dependency: '_BaseBotoClientOrResource',
-            constructor: Callable,
+            boto_kwargs: Dict[str, Any],
+            constructor: Callable[[Dict[str, Any]], Any],
             force_create: bool = False
     ):
-        if not force_create and (boto_obj := self._boto_obj_store.get(dependency)):
-            return boto_obj
+        """ Returns the boto object made for `dependency`, making a new one when the kwargs differ from
+            the ones it was made with. The shared kwargs can be changed from any thread, so a client made
+            earlier in this thread may have been made with old ones.
+        """
+        if not force_create and (stored := self._boto_obj_store.get(dependency)):
+            stored_kwargs, boto_obj = stored
+            if stored_kwargs == boto_kwargs:
+                return boto_obj
 
-        boto_obj = constructor()
-        self._boto_obj_store[dependency] = boto_obj
+        boto_obj = constructor(boto_kwargs)
+        self._boto_obj_store[dependency] = (boto_kwargs, boto_obj)
         return boto_obj
 
     def _reset_boto_obj_for_dependency(self, dependency: '_BaseBotoClientOrResource'):
@@ -147,15 +153,48 @@ boto_session = BotoSession.proxy()
 """
 
 
-# TODO: Need to separate `xboto_kwargs` configuration from the actual resource,
-#   so the configuration can be global while the resource is pre-thread.
-#   For now, to get by until I have time to do the separation:
-#       temporary look at a environmental variable to decide if we should make
-#       the clients/resources thread-sharable or not.
-class _BaseBotoClientOrResource(Dependency, thread_sharable=xbool.bool_env('XBOTO_THREAD_SHARABLE')):
+class BotoKwargs(Dependency):
+    """
+    The kwargs that one kind of boto client or resource is created with, shared by every thread.
+
+    Clients and resources are made per thread, so a client made in one thread is never used by
+    another. Settings such as an `endpoint_url` are for the whole app, so they live here instead.
+    Every thread's client or resource is made with them.
+
+    Each client and resource has its own subclass, at `SharedKwargs` on its dependency class:
+
+    >>> BotoClients.ApiGatewayManagementApi.SharedKwargs.grab().boto_kwargs = {
+    ...     'endpoint_url': 'https://wsapi.example.com'
+    ... }
+
+    Or for a while:
+
+    >>> with BotoResources.DynamoDB.SharedKwargs(endpoint_url='http://localhost:8000'):
+    ...     ...
+
+    Kwargs given to the client or resource dependency itself are used on top of these.
+    """
+
+    def __init__(self, **boto_kwargs):
+        self._boto_kwargs = {**boto_kwargs}
+
+    @property
+    def boto_kwargs(self) -> Dict[str, Any]:
+        return self._boto_kwargs.copy()
+
+    @boto_kwargs.setter
+    def boto_kwargs(self, value: Dict[str, Any]):
+        """ Clients and resources already made are made again, with these, the next time they're used. """
+        self._boto_kwargs = {**value}
+
+
+class _BaseBotoClientOrResource(Dependency, thread_sharable=False):
     # Class Vars
     _boto_name: str = ''
     _boto_kind: str = ''
+
+    SharedKwargs: Type[BotoKwargs]
+    """ The kwargs every thread's client or resource of this kind is made with; see `BotoKwargs`. """
 
     # Instance Vars
 
@@ -232,6 +271,8 @@ class _BaseBotoClientOrResource(Dependency, thread_sharable=xbool.bool_env('XBOT
         super().__init_subclass__(**kwargs)
         cls._boto_name = boto_name
         cls._boto_kind = boto_kind
+        if boto_name:
+            cls.SharedKwargs = type(f'{cls.__name__}SharedKwargs', (BotoKwargs,), {})
 
     def reset(self):
         """ Resets the client; it will be re-created lazily next time it's asked for.
@@ -240,27 +281,15 @@ class _BaseBotoClientOrResource(Dependency, thread_sharable=xbool.bool_env('XBOT
         BotoSession.grab()._reset_boto_obj_for_dependency(self)
 
     def get(self):
-        # If user specified their own 'endpoint_url', we are not using the default.
-        # Otherwise, check to make sure settings value is still same as what we used;
-        # we want a new object if the default endpoint_url has changed...
-        #
-        # For now, we just throw-away any old object if default has changed and user did not
-        # specify their own endpoint_url value. If it changes frequently for some reason we
-        # could optimize by store a client per-endpoint_url value, so we can reuse old
-        # client when old values are restored.
+        boto_kwargs = {**self.SharedKwargs.grab().boto_kwargs, **self._boto_kwargs}
 
-        def constructor():
+        def constructor(kwargs: Dict[str, Any]):
             # `kind` is either 'client' or 'resource', we get the correct creation method...
             boto_creation_method = getattr(boto_session.session, self._boto_kind)
-
-            # We then call creation method with the resource/client name and any other kwargs;
-            # For the kwargs, we start with any defaults and then add in user specified ones...
-            return boto_creation_method(
-                self._boto_name, **self._boto_kwargs
-            )
+            return boto_creation_method(self._boto_name, **kwargs)
 
         # noinspection PyProtectedMember
-        return BotoSession.grab()._boto_obj_for_dependency(self, constructor)
+        return BotoSession.grab()._boto_obj_for_dependency(self, boto_kwargs, constructor)
 
     @classmethod
     def _get_dependency_cls(cls, boto_name: str) -> 'Type[_BaseBotoClientOrResource]':
