@@ -109,6 +109,34 @@ def some_func():
     my_ssm = ssm.get_object('/some-key')
 ```
 
+## Settings for every thread
+
+Each thread gets its own client or resource. To create all of them with the same settings, such as
+an `endpoint_url`, set them on the client's `SharedKwargs`. It is shared by every thread:
+
+```python
+from xboto import BotoClients
+
+BotoClients.ApiGatewayManagementApi.SharedKwargs.grab().boto_kwargs = {
+    'endpoint_url': 'https://wsapi.example.com',
+}
+```
+
+Every client made after this, in any thread, uses that endpoint. A client made earlier is made
+again the next time it's used.
+
+To use different settings for a while:
+
+```python
+from xboto import BotoResources
+
+with BotoResources.DynamoDB.SharedKwargs(endpoint_url='http://localhost:8000'):
+    ...
+```
+
+Kwargs given to a client or resource directly, like `BotoClients.Ssm(region_name='us-west-2')`,
+are used on top of the shared ones. Between unit tests, the shared kwargs are cleared.
+
 ## Configuration (Deprecated)
 
 To change the endpoint_url used when boto3 creates a new client or resource,
